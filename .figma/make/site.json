@@ -1,0 +1,10 @@
+{
+  "description": "Visualize and compare heuristic search algorithms through interactive simulations of classic puzzles and pathfinding, enhancing learning and analysis.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

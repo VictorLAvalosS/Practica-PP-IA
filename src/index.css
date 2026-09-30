@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg-base: #0e0f11;
+  --color-bg-panel: #13151a;
+  --color-bg-surface: #1a1d24;
+  --color-bg-elevated: #21252e;
+  --color-bg-hover: #272b35;
+
+  --color-border-subtle: #2a2e38;
+  --color-border-muted: #363b47;
+  --color-border-active: #4a5060;
+
+  --color-text-primary: #e4e6ed;
+  --color-text-secondary: #8b91a0;
+  --color-text-muted: #555c6e;
+  --color-text-disabled: #3a3f4d;
+
+  --color-accent-green: #39ff7e;
+  --color-accent-green-dim: #1a7a3d;
+  --color-accent-green-glow: rgba(57, 255, 126, 0.15);
+  --color-accent-yellow: #f0c040;
+  --color-accent-yellow-dim: #7a6020;
+  --color-accent-yellow-glow: rgba(240, 192, 64, 0.12);
+  --color-accent-red: #ff4545;
+  --color-accent-red-dim: #7a2020;
+  --color-accent-red-glow: rgba(255, 69, 69, 0.12);
+  --color-accent-blue: #4a90d9;
+  --color-accent-orange: #e06030;
+  --color-accent-purple: #7c6af0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-muted); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-active); }
+
+/* Mono utility */
+.mono { font-family: var(--font-mono); }
+
+@keyframes pulse-glow-green {
+  0%, 100% { box-shadow: 0 0 4px rgba(57,255,126,0.3); }
+  50% { box-shadow: 0 0 12px rgba(57,255,126,0.7); }
+}
+@keyframes pulse-glow-yellow {
+  0%, 100% { box-shadow: 0 0 4px rgba(240,192,64,0.3); }
+  50% { box-shadow: 0 0 12px rgba(240,192,64,0.6); }
+}
+@keyframes node-expand {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes path-draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes water-shimmer {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.18; }
+}
+
+@keyframes boat-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(0.8deg); }
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
