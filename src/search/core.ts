@@ -19,8 +19,9 @@ export abstract class Problema<S extends Estado, A extends Accion> {
 
   abstract aplica(estado: S, accion: A): S;
 
-  costoCamino(_costoAcumulado: number, _estadoOrigen: S, _accion: A, _estadoDestino: S): number {
-    return 1;
+  // g(n') = g(n) + c(n, a, n'): el costo del camino se ACUMULA desde el estado inicial
+  costoCamino(costoAcumulado: number, _estadoOrigen: S, accion: A, _estadoDestino: S): number {
+    return costoAcumulado + accion.costo;
   }
 
   heuristica(_estado: S): number {

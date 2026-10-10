@@ -133,8 +133,24 @@ function solveMC(algoId: AlgorithmId): SolveMCOutput {
   return { nodes, solution, result: resultado };
 }
 
-const DEFAULT_GRID_SIZE = 8;
+const DEFAULT_GRID_SIZE = 10;
 
+// Escenario de prueba 10×10 — Inicio (0,0), Comida (9,9), 16 muros.
+//
+//   S . . . . . # . . .
+//   . . . . . . # . . .
+//   . . # . . . # . . .
+//   . . # . . . # . . .
+//   . . # . . . # . . .
+//   . . . . . . # . . .
+//   . . # # # # # . . .
+//   . . . . . . . . . .
+//   . . . . . . . # . .
+//   . . . . . . . # . F
+//
+// Guiada solo por h(n), la Búsqueda Voraz baja hasta la fila 9 y choca con el muro de la
+// columna 7, por lo que debe subir y rodearlo (22 pasos, no óptimo). BPP desciende por ramas
+// largas (40 pasos). BPA, UCS y A* encuentran el óptimo de 18 pasos.
 function makeDefaultGrid(): GridCell[][] {
   const g: GridCell[][] = Array.from({ length: DEFAULT_GRID_SIZE }, () =>
     Array.from(
@@ -143,12 +159,14 @@ function makeDefaultGrid(): GridCell[][] {
     ),
   );
   const walls: [number, number][] = [
-    [1, 1], [1, 2], [1, 3], [2, 5], [3, 2], [3, 3], [4, 1],
-    [4, 5], [5, 3], [5, 4], [6, 2], [6, 5], [2, 2],
+    [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6], // columna 6
+    [6, 2], [6, 3], [6, 4], [6, 5],                         // fila 6
+    [2, 2], [3, 2], [4, 2],                                 // columna 2
+    [8, 7], [9, 7],                                         // columna 7 (abajo)
   ];
   for (const [r, c] of walls) g[r][c].type = 'wall';
   g[0][0].type = 'start';
-  g[7][7].type = 'food';
+  g[9][9].type = 'food';
   return g;
 }
 

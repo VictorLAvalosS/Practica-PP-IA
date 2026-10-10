@@ -165,13 +165,14 @@ export class MCProblema extends Problema<MCEstado, MCAccion> {
     }
   }
 
+  // Cada viaje del bote cuesta 1: g(n') = g(n) + 1 (antes devolvía siempre 1 y g(n) no se acumulaba)
   costoCamino(
-    _costoAcumulado: number,
+    costoAcumulado: number,
     _estadoOrigen: MCEstado,
-    _accion: MCAccion,
+    accion: MCAccion,
     _estadoDestino: MCEstado,
   ): number {
-    return 1;
+    return costoAcumulado + accion.costo;
   }
 
   heuristica(estado: MCEstado): number {
