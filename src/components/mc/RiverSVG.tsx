@@ -25,7 +25,7 @@ export function RiverSVG({ currentState, viajeros, totalM, totalC, capBote }: Ri
   const FIGS_GAP = 42;
   const FIGS_Y = groundY + 4;
   const LEFT_FIGS_START = 28;
-  const RIGHT_FIGS_START = riverR + 28;
+  const RIGHT_FIGS_START = riverR + 60; // deja espacio para el bote atracado en la orilla derecha
   const TREES_Y = groundY;
   const LEFT_TREES = [45, 105, 170];
   const RIGHT_TREES = [670, 732, 795];
@@ -68,8 +68,10 @@ export function RiverSVG({ currentState, viajeros, totalM, totalC, capBote }: Ri
 
   function FigureM({ x, y, idx }: { x: number; y: number; idx: number }) {
     return (
+      // La posición va en un <g> externo: la animación CSS (transform: translateY)
+      // reemplazaría el atributo transform si ambos estuvieran en el mismo elemento.
+      <g transform={`translate(${x},${y})`}>
       <g
-        transform={`translate(${x},${y})`}
         style={{
           animation: `float-icon ${1.9 + idx * 0.18}s ease-in-out infinite`,
           animationDelay: `${idx * 0.22}s`,
@@ -84,15 +86,18 @@ export function RiverSVG({ currentState, viajeros, totalM, totalC, capBote }: Ri
         <circle cx={3} cy={-41} r={1.25} fill="#1a2030" />
         <path d="M-3,-37 Q0,-35 3,-37" stroke="#1a2030" strokeWidth={1} fill="none" strokeLinecap="round" />
         <rect x={-9.5} y={-9} width={19} height={4} fill={missionaryColor} opacity={0.65} />
-        <text x={0} y={10.5} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono,monospace" fill={missionaryColor} fontWeight="800">MISIONERO</text>
+        <text x={0} y={10.5} textAnchor="middle" fontSize={7} fontFamily="JetBrains Mono,monospace" fill={missionaryColor} fontWeight="800">MISIONERO</text>
+      </g>
       </g>
     );
   }
 
   function FigureC({ x, y, idx }: { x: number; y: number; idx: number }) {
     return (
+      // La posición va en un <g> externo: la animación CSS (transform: translateY)
+      // reemplazaría el atributo transform si ambos estuvieran en el mismo elemento.
+      <g transform={`translate(${x},${y})`}>
       <g
-        transform={`translate(${x},${y})`}
         style={{
           animation: `float-icon ${2.3 + idx * 0.14}s ease-in-out infinite`,
           animationDelay: `${idx * 0.28}s`,
@@ -109,7 +114,8 @@ export function RiverSVG({ currentState, viajeros, totalM, totalC, capBote }: Ri
         <circle cx={3.5} cy={-42.5} r={1} fill="#1a0505" />
         <path d="M-4,-34 L-2,-31 L0,-34 L2,-31 L4,-34" stroke="#3a0808" strokeWidth={1.3} fill="none" strokeLinecap="round" />
         <rect x={-9.5} y={-9} width={19} height={4} fill={cannibalColor} opacity={0.65} />
-        <text x={0} y={10.5} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono,monospace" fill={cannibalColor} fontWeight="800">CANÍBAL</text>
+        <text x={0} y={10.5} textAnchor="middle" fontSize={7} fontFamily="JetBrains Mono,monospace" fill={cannibalColor} fontWeight="800">CANÍBAL</text>
+      </g>
       </g>
     );
   }
@@ -141,7 +147,7 @@ export function RiverSVG({ currentState, viajeros, totalM, totalC, capBote }: Ri
   }
 
   const leftGap = Math.min(42, 280 / Math.max(1, drawMLeft + drawCLeft));
-  const rightGap = Math.min(42, (W - riverR - 56) / Math.max(1, drawMRight + drawCRight));
+  const rightGap = Math.min(42, (W - RIGHT_FIGS_START - 28) / Math.max(1, drawMRight + drawCRight));
 
   const leftFigs: React.ReactNode[] = [];
   for (let i = 0; i < drawMLeft; i++)

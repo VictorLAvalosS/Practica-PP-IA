@@ -26,95 +26,36 @@ function mcIsGoal(s: MCState) {
   return s.mLeft === 0 && s.cLeft === 0 && s.boat === 'right';
 }
 
-function buscarPadreId(
-  padre: Nodo<MCEstado, MCAccion>,
-  idMap: Map<string, string>,
-): string | null {
-  for (const [clave, id] of idMap.entries()) {
-    const claveEstado = clave.split('|')[0];
-    if (claveEstado === padre.estado.clave()) {
-      return id;
-    }
-  }
-  return null;
-}
-
-function convertirNodoMC(
-  nodo: Nodo<MCEstado, MCAccion>,
-  idMap: Map<string, string>,
-  idCounter: { value: number },
-  pruned = false,
-  pruneReason?: string,
-): TreeNode {
-  const clave = `${nodo.estado.clave()}|${idCounter.value}`;
-  const id = `n${idCounter.value++}`;
-  idMap.set(clave, id);
-
-  return {
-    id,
-    state: nodo.estado.aRaw(),
-    parent: nodo.padre ? buscarPadreId(nodo.padre, idMap) : null,
-    depth: nodo.profundidad,
-    action: nodo.accion ? nodo.accion.nombre : 'Inicio',
-    pruned,
-    pruneReason,
-  };
-}
-
+// Construye el árbol visual identificando cada nodo por REFERENCIA (no por clave de estado):
+// el mismo estado puede generarse varias veces y solo los duplicados descartados son "podados".
 function construirArbolMC(
   resultado: ResultadoBusqueda<MCEstado, MCAccion>,
 ): TreeNode[] {
   const nodos: TreeNode[] = [];
-  const idMap = new Map<string, string>();
-  const idCounter = { value: 0 };
+  const ids = new Map<Nodo<MCEstado, MCAccion>, string>();
+  const podados = new Map<Nodo<MCEstado, MCAccion>, string>();
+  for (const pod of resultado.nodosPodados) podados.set(pod.nodo, pod.razon);
 
-  const raiz = resultado.nodosGenerados[0];
-  if (raiz) {
-    nodos.push(convertirNodoMC(raiz, idMap, idCounter, false));
-  }
+  let contador = 0;
+  const agregar = (nodo: Nodo<MCEstado, MCAccion>) => {
+    if (ids.has(nodo)) return;
+    const id = `n${contador++}`;
+    ids.set(nodo, id);
+    const razon = podados.get(nodo);
+    nodos.push({
+      id,
+      state: nodo.estado.aRaw(),
+      parent: nodo.padre ? ids.get(nodo.padre) ?? null : null,
+      depth: nodo.profundidad,
+      action: nodo.accion ? nodo.accion.nombre : 'Inicio',
+      pruned: razon !== undefined,
+      pruneReason: razon,
+    });
+  };
 
-  const expandidosClaves = new Set<string>(
-    resultado.nodosExpandidos.map((n) => n.estado.clave()),
-  );
-
-  for (let i = 1; i < resultado.nodosGenerados.length; i++) {
-    const nodo = resultado.nodosGenerados[i];
-    const estadoClave = nodo.estado.clave();
-
-    let esPodado = false;
-    let razonPodado: string | undefined;
-    for (const pod of resultado.nodosPodados) {
-      if (pod.nodo.estado.clave() === estadoClave) {
-        esPodado = true;
-        razonPodado = pod.razon;
-        break;
-      }
-    }
-
-    if (!esPodado && !expandidosClaves.has(estadoClave)) {
-      for (let j = 0; j < i; j++) {
-        if (resultado.nodosGenerados[j].estado.clave() === estadoClave) {
-          esPodado = true;
-          razonPodado = 'Estado repetido (frontera)';
-          break;
-        }
-      }
-    }
-
-    nodos.push(convertirNodoMC(nodo, idMap, idCounter, esPodado, razonPodado));
-  }
-
-  for (const pod of resultado.nodosPodados) {
-    const yaExiste = nodos.some(
-      (n) =>
-        n.state.mLeft === pod.nodo.estado.mLeft &&
-        n.state.cLeft === pod.nodo.estado.cLeft &&
-        n.state.boat === pod.nodo.estado.boat,
-    );
-    if (!yaExiste) {
-      nodos.push(convertirNodoMC(pod.nodo, idMap, idCounter, true, pod.razon));
-    }
-  }
+  // nodosGenerados está en orden de generación: cada padre aparece antes que sus hijos
+  for (const nodo of resultado.nodosGenerados) agregar(nodo);
+  for (const pod of resultado.nodosPodados) agregar(pod.nodo);
 
   return nodos;
 }
