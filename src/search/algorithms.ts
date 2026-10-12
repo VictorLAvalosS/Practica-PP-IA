@@ -1,91 +1,104 @@
-import { Problema, Nodo, Estado, Accion, ResultadoBusqueda } from './core';
+import { Problema, Nodo, Estado, Accion, ResultadoBusqueda } from "./core"
 
 interface ColaPrioridadItem<S extends Estado, A extends Accion> {
-  nodo: Nodo<S, A>;
-  prioridad: number;
+  nodo: Nodo<S, A>
+  prioridad: number
 }
 
 class ColaPrioridad<S extends Estado, A extends Accion> {
-  private items: ColaPrioridadItem<S, A>[] = [];
+  private items: ColaPrioridadItem<S, A>[] = []
 
   insertar(nodo: Nodo<S, A>, prioridad: number): void {
-    this.items.push({ nodo, prioridad });
-    this.ordenar();
+    this.items.push({ nodo, prioridad })
+    this.ordenar()
   }
 
   extraerMin(): Nodo<S, A> | null {
-    return this.items.shift()?.nodo ?? null;
+    return this.items.shift()?.nodo ?? null
   }
 
   estaVacia(): boolean {
-    return this.items.length === 0;
+    return this.items.length === 0
   }
 
   tamano(): number {
-    return this.items.length;
+    return this.items.length
   }
 
   contieneNodoConEstado(claveEstado: string): boolean {
-    return this.items.some(item => item.nodo.estado.clave() === claveEstado);
+    return this.items.some((item) => item.nodo.estado.clave() === claveEstado)
   }
 
   obtenerCostoNodo(claveEstado: string): number | null {
-    const item = this.items.find(i => i.nodo.estado.clave() === claveEstado);
-    return item ? item.nodo.costoAcumulado : null;
+    const item = this.items.find((i) => i.nodo.estado.clave() === claveEstado)
+    return item ? item.nodo.costoAcumulado : null
   }
 
   reemplazarSiMejor(nodo: Nodo<S, A>, prioridad: number): boolean {
-    const idx = this.items.findIndex(i => i.nodo.estado.clave() === nodo.estado.clave());
+    const idx = this.items.findIndex(
+      (i) => i.nodo.estado.clave() === nodo.estado.clave(),
+    )
     if (idx === -1) {
-      this.insertar(nodo, prioridad);
-      return true;
+      this.insertar(nodo, prioridad)
+      return true
     }
     if (this.items[idx].nodo.costoAcumulado > nodo.costoAcumulado) {
-      this.items[idx] = { nodo, prioridad };
-      this.ordenar();
-      return true;
+      this.items[idx] = { nodo, prioridad }
+      this.ordenar()
+      return true
     }
-    return false;
+    return false
   }
 
   private ordenar(): void {
-    this.items.sort((a, b) => a.prioridad - b.prioridad);
+    this.items.sort((a, b) => a.prioridad - b.prioridad)
   }
 
   obtenerNodos(): Nodo<S, A>[] {
-    return this.items.map(i => i.nodo);
+    return this.items.map((i) => i.nodo)
   }
 }
 
 export function busquedaEnProfundidad<S extends Estado, A extends Accion>(
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
-  const nodoInicial = new Nodo<S, A>(problema.estadoInicial);
+  const nodoInicial = new Nodo<S, A>(problema.estadoInicial)
 
   if (problema.testObjetivo(nodoInicial.estado)) {
-    return construirResultado(true, nodoInicial, [nodoInicial], [], [], [nodoInicial.estado], [nodoInicial.estado]);
+    return construirResultado(
+      true,
+      nodoInicial,
+      [nodoInicial],
+      [],
+      [],
+      [nodoInicial.estado],
+      [nodoInicial.estado],
+    )
   }
 
-  const pila: Nodo<S, A>[] = [nodoInicial];
-  const cerrado = new Set<string>();
-  const nodosGenerados: Nodo<S, A>[] = [nodoInicial];
-  const nodosExpandidos: Nodo<S, A>[] = [];
-  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = [];
-  const fronteraTraza: S[] = [nodoInicial.estado];
-  const exploradosTraza: S[] = [];
+  const pila: Nodo<S, A>[] = [nodoInicial]
+  const cerrado = new Set<string>()
+  const nodosGenerados: Nodo<S, A>[] = [nodoInicial]
+  const nodosExpandidos: Nodo<S, A>[] = []
+  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = []
+  const fronteraTraza: S[] = [nodoInicial.estado]
+  const exploradosTraza: S[] = []
 
   while (pila.length > 0) {
-    const nodoActual = pila.pop()!;
-    const claveActual = nodoActual.estado.clave();
+    const nodoActual = pila.pop()!
+    const claveActual = nodoActual.estado.clave()
 
     if (cerrado.has(claveActual)) {
-      nodosPodados.push({ nodo: nodoActual, razon: 'Estado repetido (cerrado)' });
-      continue;
+      nodosPodados.push({
+        nodo: nodoActual,
+        razon: "Estado repetido (cerrado)",
+      })
+      continue
     }
 
-    nodosExpandidos.push(nodoActual);
-    cerrado.add(claveActual);
-    exploradosTraza.push(nodoActual.estado);
+    nodosExpandidos.push(nodoActual)
+    cerrado.add(claveActual)
+    exploradosTraza.push(nodoActual.estado)
 
     if (problema.testObjetivo(nodoActual.estado)) {
       return construirResultado(
@@ -96,28 +109,28 @@ export function busquedaEnProfundidad<S extends Estado, A extends Accion>(
         nodosPodados,
         fronteraTraza,
         exploradosTraza,
-      );
+      )
     }
 
-    const sucesores = Nodo.expandir(problema, nodoActual);
+    const sucesores = Nodo.expandir(problema, nodoActual)
 
     for (let i = sucesores.length - 1; i >= 0; i--) {
-      const hijo = sucesores[i];
-      nodosGenerados.push(hijo);
-      const claveHijo = hijo.estado.clave();
+      const hijo = sucesores[i]
+      nodosGenerados.push(hijo)
+      const claveHijo = hijo.estado.clave()
 
       if (cerrado.has(claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (cerrado)' });
-        continue;
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (cerrado)" })
+        continue
       }
 
-      if (pila.some(n => n.estado.clave() === claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (frontera)' });
-        continue;
+      if (pila.some((n) => n.estado.clave() === claveHijo)) {
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (frontera)" })
+        continue
       }
 
-      pila.push(hijo);
-      fronteraTraza.push(hijo.estado);
+      pila.push(hijo)
+      fronteraTraza.push(hijo.estado)
     }
   }
 
@@ -129,33 +142,41 @@ export function busquedaEnProfundidad<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  );
+  )
 }
 
 export function busquedaCostoUniforme<S extends Estado, A extends Accion>(
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
-  const nodoInicial = new Nodo<S, A>(problema.estadoInicial);
+  const nodoInicial = new Nodo<S, A>(problema.estadoInicial)
 
   if (problema.testObjetivo(nodoInicial.estado)) {
-    return construirResultado(true, nodoInicial, [nodoInicial], [], [], [nodoInicial.estado], [nodoInicial.estado]);
+    return construirResultado(
+      true,
+      nodoInicial,
+      [nodoInicial],
+      [],
+      [],
+      [nodoInicial.estado],
+      [nodoInicial.estado],
+    )
   }
 
-  const frontera = new ColaPrioridad<S, A>();
-  frontera.insertar(nodoInicial, nodoInicial.costoAcumulado);
+  const frontera = new ColaPrioridad<S, A>()
+  frontera.insertar(nodoInicial, nodoInicial.costoAcumulado)
 
-  const cerrado = new Set<string>();
-  const nodosGenerados: Nodo<S, A>[] = [nodoInicial];
-  const nodosExpandidos: Nodo<S, A>[] = [];
-  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = [];
-  const fronteraTraza: S[] = [nodoInicial.estado];
-  const exploradosTraza: S[] = [];
+  const cerrado = new Set<string>()
+  const nodosGenerados: Nodo<S, A>[] = [nodoInicial]
+  const nodosExpandidos: Nodo<S, A>[] = []
+  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = []
+  const fronteraTraza: S[] = [nodoInicial.estado]
+  const exploradosTraza: S[] = []
 
   while (!frontera.estaVacia()) {
-    const nodoActual = frontera.extraerMin()!;
-    nodosExpandidos.push(nodoActual);
-    cerrado.add(nodoActual.estado.clave());
-    exploradosTraza.push(nodoActual.estado);
+    const nodoActual = frontera.extraerMin()!
+    nodosExpandidos.push(nodoActual)
+    cerrado.add(nodoActual.estado.clave())
+    exploradosTraza.push(nodoActual.estado)
 
     if (problema.testObjetivo(nodoActual.estado)) {
       return construirResultado(
@@ -166,32 +187,35 @@ export function busquedaCostoUniforme<S extends Estado, A extends Accion>(
         nodosPodados,
         fronteraTraza,
         exploradosTraza,
-      );
+      )
     }
 
-    const sucesores = Nodo.expandir(problema, nodoActual);
+    const sucesores = Nodo.expandir(problema, nodoActual)
 
     for (const hijo of sucesores) {
-      nodosGenerados.push(hijo);
-      const claveHijo = hijo.estado.clave();
+      nodosGenerados.push(hijo)
+      const claveHijo = hijo.estado.clave()
 
       if (cerrado.has(claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (cerrado)' });
-        continue;
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (cerrado)" })
+        continue
       }
 
-      const gN = hijo.costoAcumulado;
+      const gN = hijo.costoAcumulado
 
       if (frontera.contieneNodoConEstado(claveHijo)) {
-        const costoExistente = frontera.obtenerCostoNodo(claveHijo);
+        const costoExistente = frontera.obtenerCostoNodo(claveHijo)
         if (costoExistente !== null && costoExistente <= gN) {
-          nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (frontera con mejor g(n))' });
-          continue;
+          nodosPodados.push({
+            nodo: hijo,
+            razon: "Estado repetido (frontera con mejor g(n))",
+          })
+          continue
         }
       }
 
-      frontera.reemplazarSiMejor(hijo, gN);
-      fronteraTraza.push(hijo.estado);
+      frontera.reemplazarSiMejor(hijo, gN)
+      fronteraTraza.push(hijo.estado)
     }
   }
 
@@ -203,38 +227,46 @@ export function busquedaCostoUniforme<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  );
+  )
 }
 
 export function busquedaEnAnchura<S extends Estado, A extends Accion>(
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
-  const nodoInicial = new Nodo<S, A>(problema.estadoInicial);
+  const nodoInicial = new Nodo<S, A>(problema.estadoInicial)
 
   if (problema.testObjetivo(nodoInicial.estado)) {
-    return construirResultado(true, nodoInicial, [nodoInicial], [], [], [nodoInicial.estado], [nodoInicial.estado]);
+    return construirResultado(
+      true,
+      nodoInicial,
+      [nodoInicial],
+      [],
+      [],
+      [nodoInicial.estado],
+      [nodoInicial.estado],
+    )
   }
 
-  const frontera: Nodo<S, A>[] = [nodoInicial];
-  const cerrado = new Set<string>();
-  const nodosGenerados: Nodo<S, A>[] = [nodoInicial];
-  const nodosExpandidos: Nodo<S, A>[] = [];
-  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = [];
-  const fronteraTraza: S[] = [nodoInicial.estado];
-  const exploradosTraza: S[] = [];
+  const frontera: Nodo<S, A>[] = [nodoInicial]
+  const cerrado = new Set<string>()
+  const nodosGenerados: Nodo<S, A>[] = [nodoInicial]
+  const nodosExpandidos: Nodo<S, A>[] = []
+  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = []
+  const fronteraTraza: S[] = [nodoInicial.estado]
+  const exploradosTraza: S[] = []
 
   while (frontera.length > 0) {
-    const nodoActual = frontera.shift()!;
-    nodosExpandidos.push(nodoActual);
-    cerrado.add(nodoActual.estado.clave());
-    exploradosTraza.push(nodoActual.estado);
+    const nodoActual = frontera.shift()!
+    nodosExpandidos.push(nodoActual)
+    cerrado.add(nodoActual.estado.clave())
+    exploradosTraza.push(nodoActual.estado)
 
-    const sucesores = Nodo.expandir(problema, nodoActual);
+    const sucesores = Nodo.expandir(problema, nodoActual)
 
     for (const hijo of sucesores) {
-      nodosGenerados.push(hijo);
+      nodosGenerados.push(hijo)
 
-      const claveHijo = hijo.estado.clave();
+      const claveHijo = hijo.estado.clave()
 
       if (problema.testObjetivo(hijo.estado)) {
         return construirResultado(
@@ -245,21 +277,21 @@ export function busquedaEnAnchura<S extends Estado, A extends Accion>(
           nodosPodados,
           fronteraTraza,
           exploradosTraza,
-        );
+        )
       }
 
       if (cerrado.has(claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (cerrado)' });
-        continue;
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (cerrado)" })
+        continue
       }
 
-      if (frontera.some(n => n.estado.clave() === claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (frontera)' });
-        continue;
+      if (frontera.some((n) => n.estado.clave() === claveHijo)) {
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (frontera)" })
+        continue
       }
 
-      frontera.push(hijo);
-      fronteraTraza.push(hijo.estado);
+      frontera.push(hijo)
+      fronteraTraza.push(hijo.estado)
     }
   }
 
@@ -271,33 +303,41 @@ export function busquedaEnAnchura<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  );
+  )
 }
 
 export function busquedaCodiciosa<S extends Estado, A extends Accion>(
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
-  const nodoInicial = new Nodo<S, A>(problema.estadoInicial);
+  const nodoInicial = new Nodo<S, A>(problema.estadoInicial)
 
   if (problema.testObjetivo(nodoInicial.estado)) {
-    return construirResultado(true, nodoInicial, [nodoInicial], [], [], [nodoInicial.estado], [nodoInicial.estado]);
+    return construirResultado(
+      true,
+      nodoInicial,
+      [nodoInicial],
+      [],
+      [],
+      [nodoInicial.estado],
+      [nodoInicial.estado],
+    )
   }
 
-  const frontera = new ColaPrioridad<S, A>();
-  frontera.insertar(nodoInicial, problema.heuristica(nodoInicial.estado));
+  const frontera = new ColaPrioridad<S, A>()
+  frontera.insertar(nodoInicial, problema.heuristica(nodoInicial.estado))
 
-  const cerrado = new Set<string>();
-  const nodosGenerados: Nodo<S, A>[] = [nodoInicial];
-  const nodosExpandidos: Nodo<S, A>[] = [];
-  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = [];
-  const fronteraTraza: S[] = [nodoInicial.estado];
-  const exploradosTraza: S[] = [];
+  const cerrado = new Set<string>()
+  const nodosGenerados: Nodo<S, A>[] = [nodoInicial]
+  const nodosExpandidos: Nodo<S, A>[] = []
+  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = []
+  const fronteraTraza: S[] = [nodoInicial.estado]
+  const exploradosTraza: S[] = []
 
   while (!frontera.estaVacia()) {
-    const nodoActual = frontera.extraerMin()!;
-    nodosExpandidos.push(nodoActual);
-    cerrado.add(nodoActual.estado.clave());
-    exploradosTraza.push(nodoActual.estado);
+    const nodoActual = frontera.extraerMin()!
+    nodosExpandidos.push(nodoActual)
+    cerrado.add(nodoActual.estado.clave())
+    exploradosTraza.push(nodoActual.estado)
 
     if (problema.testObjetivo(nodoActual.estado)) {
       return construirResultado(
@@ -308,32 +348,35 @@ export function busquedaCodiciosa<S extends Estado, A extends Accion>(
         nodosPodados,
         fronteraTraza,
         exploradosTraza,
-      );
+      )
     }
 
-    const sucesores = Nodo.expandir(problema, nodoActual);
+    const sucesores = Nodo.expandir(problema, nodoActual)
 
     for (const hijo of sucesores) {
-      nodosGenerados.push(hijo);
-      const claveHijo = hijo.estado.clave();
+      nodosGenerados.push(hijo)
+      const claveHijo = hijo.estado.clave()
 
       if (cerrado.has(claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (cerrado)' });
-        continue;
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (cerrado)" })
+        continue
       }
 
-      const fN = problema.heuristica(hijo.estado);
+      const fN = problema.heuristica(hijo.estado)
 
       if (frontera.contieneNodoConEstado(claveHijo)) {
-        const costoExistente = frontera.obtenerCostoNodo(claveHijo);
+        const costoExistente = frontera.obtenerCostoNodo(claveHijo)
         if (costoExistente !== null && costoExistente <= hijo.costoAcumulado) {
-          nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (frontera con mejor f(n))' });
-          continue;
+          nodosPodados.push({
+            nodo: hijo,
+            razon: "Estado repetido (frontera con mejor f(n))",
+          })
+          continue
         }
       }
 
-      frontera.reemplazarSiMejor(hijo, fN);
-      fronteraTraza.push(hijo.estado);
+      frontera.reemplazarSiMejor(hijo, fN)
+      fronteraTraza.push(hijo.estado)
     }
   }
 
@@ -345,34 +388,42 @@ export function busquedaCodiciosa<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  );
+  )
 }
 
 export function busquedaAEstrella<S extends Estado, A extends Accion>(
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
-  const nodoInicial = new Nodo<S, A>(problema.estadoInicial);
+  const nodoInicial = new Nodo<S, A>(problema.estadoInicial)
 
   if (problema.testObjetivo(nodoInicial.estado)) {
-    return construirResultado(true, nodoInicial, [nodoInicial], [], [], [nodoInicial.estado], [nodoInicial.estado]);
+    return construirResultado(
+      true,
+      nodoInicial,
+      [nodoInicial],
+      [],
+      [],
+      [nodoInicial.estado],
+      [nodoInicial.estado],
+    )
   }
 
-  const frontera = new ColaPrioridad<S, A>();
-  const hInicial = problema.heuristica(nodoInicial.estado);
-  frontera.insertar(nodoInicial, nodoInicial.costoAcumulado + hInicial);
+  const frontera = new ColaPrioridad<S, A>()
+  const hInicial = problema.heuristica(nodoInicial.estado)
+  frontera.insertar(nodoInicial, nodoInicial.costoAcumulado + hInicial)
 
-  const cerrado = new Set<string>();
-  const nodosGenerados: Nodo<S, A>[] = [nodoInicial];
-  const nodosExpandidos: Nodo<S, A>[] = [];
-  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = [];
-  const fronteraTraza: S[] = [nodoInicial.estado];
-  const exploradosTraza: S[] = [];
+  const cerrado = new Set<string>()
+  const nodosGenerados: Nodo<S, A>[] = [nodoInicial]
+  const nodosExpandidos: Nodo<S, A>[] = []
+  const nodosPodados: { nodo: Nodo<S, A>; razon: string }[] = []
+  const fronteraTraza: S[] = [nodoInicial.estado]
+  const exploradosTraza: S[] = []
 
   while (!frontera.estaVacia()) {
-    const nodoActual = frontera.extraerMin()!;
-    nodosExpandidos.push(nodoActual);
-    cerrado.add(nodoActual.estado.clave());
-    exploradosTraza.push(nodoActual.estado);
+    const nodoActual = frontera.extraerMin()!
+    nodosExpandidos.push(nodoActual)
+    cerrado.add(nodoActual.estado.clave())
+    exploradosTraza.push(nodoActual.estado)
 
     if (problema.testObjetivo(nodoActual.estado)) {
       return construirResultado(
@@ -383,34 +434,37 @@ export function busquedaAEstrella<S extends Estado, A extends Accion>(
         nodosPodados,
         fronteraTraza,
         exploradosTraza,
-      );
+      )
     }
 
-    const sucesores = Nodo.expandir(problema, nodoActual);
+    const sucesores = Nodo.expandir(problema, nodoActual)
 
     for (const hijo of sucesores) {
-      nodosGenerados.push(hijo);
-      const claveHijo = hijo.estado.clave();
+      nodosGenerados.push(hijo)
+      const claveHijo = hijo.estado.clave()
 
       if (cerrado.has(claveHijo)) {
-        nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (cerrado)' });
-        continue;
+        nodosPodados.push({ nodo: hijo, razon: "Estado repetido (cerrado)" })
+        continue
       }
 
-      const gN = hijo.costoAcumulado;
-      const hN = problema.heuristica(hijo.estado);
-      const fN = gN + hN;
+      const gN = hijo.costoAcumulado
+      const hN = problema.heuristica(hijo.estado)
+      const fN = gN + hN
 
       if (frontera.contieneNodoConEstado(claveHijo)) {
-        const costoExistente = frontera.obtenerCostoNodo(claveHijo);
+        const costoExistente = frontera.obtenerCostoNodo(claveHijo)
         if (costoExistente !== null && costoExistente <= gN) {
-          nodosPodados.push({ nodo: hijo, razon: 'Estado repetido (frontera con mejor g(n))' });
-          continue;
+          nodosPodados.push({
+            nodo: hijo,
+            razon: "Estado repetido (frontera con mejor g(n))",
+          })
+          continue
         }
       }
 
-      frontera.reemplazarSiMejor(hijo, fN);
-      fronteraTraza.push(hijo.estado);
+      frontera.reemplazarSiMejor(hijo, fN)
+      fronteraTraza.push(hijo.estado)
     }
   }
 
@@ -422,7 +476,7 @@ export function busquedaAEstrella<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  );
+  )
 }
 
 function construirResultado<S extends Estado, A extends Accion>(
@@ -444,25 +498,25 @@ function construirResultado<S extends Estado, A extends Accion>(
     nodosPodados,
     fronteraTraza,
     exploradosTraza,
-  };
+  }
 }
 
-export type AlgoritmoId = 'bfs' | 'dfs' | 'ucs' | 'astar' | 'greedy';
+export type AlgoritmoId = "bfs" | "dfs" | "ucs" | "astar" | "greedy"
 
 export function ejecutarAlgoritmo<S extends Estado, A extends Accion>(
   algoritmo: AlgoritmoId,
   problema: Problema<S, A>,
 ): ResultadoBusqueda<S, A> {
   switch (algoritmo) {
-    case 'bfs':
-      return busquedaEnAnchura(problema);
-    case 'dfs':
-      return busquedaEnProfundidad(problema);
-    case 'ucs':
-      return busquedaCostoUniforme(problema);
-    case 'greedy':
-      return busquedaCodiciosa(problema);
-    case 'astar':
-      return busquedaAEstrella(problema);
+    case "bfs":
+      return busquedaEnAnchura(problema)
+    case "dfs":
+      return busquedaEnProfundidad(problema)
+    case "ucs":
+      return busquedaCostoUniforme(problema)
+    case "greedy":
+      return busquedaCodiciosa(problema)
+    case "astar":
+      return busquedaAEstrella(problema)
   }
 }

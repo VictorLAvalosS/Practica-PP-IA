@@ -1,73 +1,90 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { GridCell, PacPos, TipoCelda } from '../../types/appTypes';
+import React, { useEffect, useRef, useState } from "react"
+import { GridCell, PacPos, TipoCelda } from "../../types/appTypes"
 
 interface PacmanVisProps {
-  grid: GridCell[][];
-  onGridChange: (g: GridCell[][]) => void;
-  path: PacPos[];
+  grid: GridCell[][]
+  onGridChange: (g: GridCell[][]) => void
+  path: PacPos[]
 }
 
 export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
-  const rows = grid.length;
-  const cols = grid[0].length;
-  const [placing, setPlacing] = useState<TipoCelda | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [cellSize, setCellSize] = useState(52);
+  const rows = grid.length
+  const cols = grid[0].length
+  const [placing, setPlacing] = useState<TipoCelda | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [cellSize, setCellSize] = useState(52)
 
   useEffect(() => {
     const obs = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      const byW = Math.floor((width - 4) / cols);
-      const byH = Math.floor((height - 4) / rows);
-      setCellSize(Math.max(32, Math.min(byW, byH, 72)));
-    });
-    if (containerRef.current) obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, [rows, cols]);
+      const { width, height } = entries[0].contentRect
+      const byW = Math.floor((width - 4) / cols)
+      const byH = Math.floor((height - 4) / rows)
+      setCellSize(Math.max(32, Math.min(byW, byH, 72)))
+    })
+    if (containerRef.current) obs.observe(containerRef.current)
+    return () => obs.disconnect()
+  }, [rows, cols])
 
-  const CELL = cellSize;
-  const svgW = cols * CELL;
-  const svgH = rows * CELL;
+  const CELL = cellSize
+  const svgW = cols * CELL
+  const svgH = rows * CELL
 
   const handleCellClick = (r: number, c: number) => {
-    if (!placing) return;
-    const g = grid.map((row) => row.map((cell) => ({ ...cell })));
-    if (placing === 'start')
+    if (!placing) return
+    const g = grid.map((row) => row.map((cell) => ({ ...cell })))
+    if (placing === "start")
       for (let i = 0; i < rows; i++)
         for (let j = 0; j < cols; j++)
-          if (g[i][j].type === 'start') g[i][j].type = 'path';
-    if (placing === 'food')
+          if (g[i][j].type === "start") g[i][j].type = "path"
+    if (placing === "food")
       for (let i = 0; i < rows; i++)
         for (let j = 0; j < cols; j++)
-          if (g[i][j].type === 'food') g[i][j].type = 'path';
-    if (placing === 'wall' && g[r][c].type === 'wall') g[r][c].type = 'path';
-    else g[r][c].type = placing;
-    onGridChange(g);
-  };
+          if (g[i][j].type === "food") g[i][j].type = "path"
+    if (placing === "wall" && g[r][c].type === "wall") g[r][c].type = "path"
+    else g[r][c].type = placing
+    onGridChange(g)
+  }
 
-  const pathSet = new Set(path.map((p) => `${p.r},${p.c}`));
-  const half = CELL / 2;
+  const pathSet = new Set(path.map((p) => `${p.r},${p.c}`))
+  const half = CELL / 2
 
   return (
     <div className="flex flex-col gap-3 h-full">
       <div className="flex items-center gap-2 flex-wrap justify-center">
-        {(['start', 'food', 'wall'] as const).map((t) => (
+        {(["start", "food", "wall"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setPlacing(placing === t ? null : t)}
             className="px-3 py-1.5 rounded mono text-xs font-medium transition-all"
             style={{
-              background: placing === t ? 'var(--color-bg-elevated)' : 'var(--color-bg-surface)',
-              border: `1px solid ${placing === t ? 'var(--color-accent-yellow)' : 'var(--color-border-subtle)'}`,
-              color: placing === t ? 'var(--color-accent-yellow)' : 'var(--color-text-secondary)',
-              cursor: 'pointer',
+              background:
+                placing === t
+                  ? "var(--color-bg-elevated)"
+                  : "var(--color-bg-surface)",
+              border: `1px solid ${
+                placing === t
+                  ? "var(--color-accent-yellow)"
+                  : "var(--color-border-subtle)"
+              }`,
+              color:
+                placing === t
+                  ? "var(--color-accent-yellow)"
+                  : "var(--color-text-secondary)",
+              cursor: "pointer",
             }}
           >
-            {t === 'start' ? '◉ Inicio (Pac-Man)' : t === 'food' ? '✦ Comida (objetivo)' : '▪ Pared (toggle)'}
+            {t === "start"
+              ? "◉ Inicio (Pac-Man)"
+              : t === "food"
+                ? "✦ Comida (objetivo)"
+                : "▪ Pared (toggle)"}
           </button>
         ))}
-        <span className="text-xs mono" style={{ color: 'var(--color-text-muted)' }}>
-          {placing ? `modo: ${placing}` : 'clic para editar'}
+        <span
+          className="text-xs mono"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {placing ? `modo: ${placing}` : "clic para editar"}
         </span>
       </div>
 
@@ -79,7 +96,7 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
         <svg
           width={svgW}
           height={svgH}
-          style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}
+          style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
           viewBox={`0 0 ${svgW} ${svgH}`}
           preserveAspectRatio="xMidYMid meet"
         >
@@ -106,29 +123,90 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
 
           {grid.map((row, r) =>
             row.map((cell, c) => {
-              const isOnPath = pathSet.has(`${r},${c}`);
-              const cx2 = c * CELL;
-              const cy2 = r * CELL;
-              const isWall = cell.type === 'wall';
-              const isFrontier = cell.heatState === 'frontier';
-              const isExplored = cell.heatState === 'explored';
+              const isOnPath = pathSet.has(`${r},${c}`)
+              const cx2 = c * CELL
+              const cy2 = r * CELL
+              const isWall = cell.type === "wall"
+              const isFrontier = cell.heatState === "frontier"
+              const isExplored = cell.heatState === "explored"
 
               return (
                 <g
                   key={`${r},${c}`}
                   onClick={() => handleCellClick(r, c)}
-                  style={{ cursor: placing ? 'pointer' : 'default' }}
+                  style={{ cursor: placing ? "pointer" : "default" }}
                 >
                   {isWall ? (
                     <>
-                      <rect x={cx2} y={cy2} width={CELL} height={CELL} fill="url(#wallGrad)" />
-                      <rect x={cx2 + 1} y={cy2 + 1} width={CELL - 2} height={CELL - 2} rx={2} fill="none" stroke="#1a3570" strokeWidth={1} />
-                      <line x1={cx2 + CELL / 2} y1={cy2 + 2} x2={cx2 + CELL / 2} y2={cy2 + CELL - 2} stroke="#0d1a40" strokeWidth={0.5} />
-                      <line x1={cx2 + 2} y1={cy2 + CELL / 2} x2={cx2 + CELL - 2} y2={cy2 + CELL / 2} stroke="#0d1a40" strokeWidth={0.5} />
-                      <rect x={cx2 + 2} y={cy2 + 2} width={4} height={4} rx={1} fill="#1a3060" opacity={0.6} />
-                      <rect x={cx2 + CELL - 6} y={cy2 + 2} width={4} height={4} rx={1} fill="#1a3060" opacity={0.6} />
-                      <rect x={cx2 + 2} y={cy2 + CELL - 6} width={4} height={4} rx={1} fill="#1a3060" opacity={0.6} />
-                      <rect x={cx2 + CELL - 6} y={cy2 + CELL - 6} width={4} height={4} rx={1} fill="#1a3060" opacity={0.6} />
+                      <rect
+                        x={cx2}
+                        y={cy2}
+                        width={CELL}
+                        height={CELL}
+                        fill="url(#wallGrad)"
+                      />
+                      <rect
+                        x={cx2 + 1}
+                        y={cy2 + 1}
+                        width={CELL - 2}
+                        height={CELL - 2}
+                        rx={2}
+                        fill="none"
+                        stroke="#1a3570"
+                        strokeWidth={1}
+                      />
+                      <line
+                        x1={cx2 + CELL / 2}
+                        y1={cy2 + 2}
+                        x2={cx2 + CELL / 2}
+                        y2={cy2 + CELL - 2}
+                        stroke="#0d1a40"
+                        strokeWidth={0.5}
+                      />
+                      <line
+                        x1={cx2 + 2}
+                        y1={cy2 + CELL / 2}
+                        x2={cx2 + CELL - 2}
+                        y2={cy2 + CELL / 2}
+                        stroke="#0d1a40"
+                        strokeWidth={0.5}
+                      />
+                      <rect
+                        x={cx2 + 2}
+                        y={cy2 + 2}
+                        width={4}
+                        height={4}
+                        rx={1}
+                        fill="#1a3060"
+                        opacity={0.6}
+                      />
+                      <rect
+                        x={cx2 + CELL - 6}
+                        y={cy2 + 2}
+                        width={4}
+                        height={4}
+                        rx={1}
+                        fill="#1a3060"
+                        opacity={0.6}
+                      />
+                      <rect
+                        x={cx2 + 2}
+                        y={cy2 + CELL - 6}
+                        width={4}
+                        height={4}
+                        rx={1}
+                        fill="#1a3060"
+                        opacity={0.6}
+                      />
+                      <rect
+                        x={cx2 + CELL - 6}
+                        y={cy2 + CELL - 6}
+                        width={4}
+                        height={4}
+                        rx={1}
+                        fill="#1a3060"
+                        opacity={0.6}
+                      />
                     </>
                   ) : (
                     <>
@@ -137,10 +215,21 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                         y={cy2}
                         width={CELL}
                         height={CELL}
-                        fill={isExplored ? '#2a0e00' : isFrontier ? '#121210' : '#0c0e12'}
+                        fill={
+                          isExplored
+                            ? "#2a0e00"
+                            : isFrontier
+                              ? "#121210"
+                              : "#0c0e12"
+                        }
                       />
                       {!isOnPath && !isExplored && !isFrontier && (
-                        <circle cx={cx2 + half} cy={cy2 + half} r={1.5} fill="#1a1f2a" />
+                        <circle
+                          cx={cx2 + half}
+                          cy={cy2 + half}
+                          r={1.5}
+                          fill="#1a1f2a"
+                        />
                       )}
                       {isFrontier && (
                         <>
@@ -185,7 +274,7 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                           />
                         </>
                       )}
-                      {isOnPath && cell.type === 'path' && (
+                      {isOnPath && cell.type === "path" && (
                         <>
                           <rect
                             x={cx2 + 1}
@@ -209,7 +298,7 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                     </>
                   )}
 
-                  {cell.type === 'start' && (
+                  {cell.type === "start" && (
                     <>
                       <rect
                         x={cx2 + 1}
@@ -226,13 +315,13 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                         y={cy2 + half + CELL * 0.18}
                         textAnchor="middle"
                         fontSize={CELL * 0.5}
-                        style={{ userSelect: 'none' }}
+                        style={{ userSelect: "none" }}
                       >
                         😮
                       </text>
                     </>
                   )}
-                  {cell.type === 'food' && (
+                  {cell.type === "food" && (
                     <>
                       <rect
                         x={cx2 + 1}
@@ -243,14 +332,16 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                         fill="rgba(57,255,126,0.08)"
                         stroke="#39ff7e"
                         strokeWidth={1.5}
-                        style={{ filter: 'drop-shadow(0 0 6px rgba(57,255,126,0.4))' }}
+                        style={{
+                          filter: "drop-shadow(0 0 6px rgba(57,255,126,0.4))",
+                        }}
                       />
                       <text
                         x={cx2 + half}
                         y={cy2 + half + CELL * 0.18}
                         textAnchor="middle"
                         fontSize={CELL * 0.48}
-                        style={{ userSelect: 'none' }}
+                        style={{ userSelect: "none" }}
                       >
                         🍒
                       </text>
@@ -267,13 +358,15 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
                     strokeWidth={0.5}
                   />
                 </g>
-              );
-            })
+              )
+            }),
           )}
 
           {path.length > 1 && (
             <polyline
-              points={path.map((p) => `${p.c * CELL + half},${p.r * CELL + half}`).join(' ')}
+              points={path
+                .map((p) => `${p.c * CELL + half},${p.r * CELL + half}`)
+                .join(" ")}
               fill="none"
               stroke="#39ff7e"
               strokeWidth={Math.max(2, CELL * 0.07)}
@@ -283,8 +376,8 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
               strokeLinejoin="round"
               strokeLinecap="round"
               style={{
-                animation: 'path-draw 1.2s ease-out forwards',
-                filter: 'drop-shadow(0 0 5px rgba(57,255,126,0.6))',
+                animation: "path-draw 1.2s ease-out forwards",
+                filter: "drop-shadow(0 0 5px rgba(57,255,126,0.6))",
               }}
             />
           )}
@@ -293,10 +386,10 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
 
       <div className="flex gap-4 flex-wrap justify-center pb-1">
         {[
-          { color: '#f0c040', label: 'Frontera', border: '#f0c04050' },
-          { color: '#e06030', label: 'Explorado', border: 'transparent' },
-          { color: '#39ff7e', label: 'Ruta Solución', border: 'transparent' },
-          { color: '#0f2050', label: 'Pared', border: '#1a3570' },
+          { color: "#f0c040", label: "Frontera", border: "#f0c04050" },
+          { color: "#e06030", label: "Explorado", border: "transparent" },
+          { color: "#39ff7e", label: "Ruta Solución", border: "transparent" },
+          { color: "#0f2050", label: "Pared", border: "#1a3570" },
         ].map(({ color, label, border }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div
@@ -305,7 +398,7 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
             />
             <span
               className="mono text-xs"
-              style={{ color: 'var(--color-text-muted)' }}
+              style={{ color: "var(--color-text-muted)" }}
             >
               {label}
             </span>
@@ -313,5 +406,5 @@ export function PacmanVis({ grid, onGridChange, path }: PacmanVisProps) {
         ))}
       </div>
     </div>
-  );
+  )
 }
